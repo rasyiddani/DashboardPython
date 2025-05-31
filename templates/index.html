@@ -1,0 +1,552 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3a8e5a;
+            --secondary-color: #652c12;
+            --light-color: #f5f5f5;
+            --dark-color: #333;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f0f0;
+            color: var(--dark-color);
+        }
+        
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .dashboard {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        /* Header Styles */
+        .header {
+            padding: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .header-alt {
+            padding: 20px;
+            background-color: var(--secondary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+        
+        .header-title h1 {
+            font-size: 24px;
+            font-weight: 500;
+        }
+        
+        .header-title p {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .settings-icon {
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        /* Sensor Readings Section */
+        .sensor-readings {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 15px;
+            gap: 15px;
+        }
+        
+        .sensor-card {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            flex: 1 0 calc(50% - 15px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .sensor-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+        
+        .sensor-icon-alt {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: var(--secondary-color);
+        }
+        
+        .sensor-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .sensor-label {
+            font-size: 14px;
+            color: #6c757d;
+        }
+        
+        /* LED Controls Section */
+        .led-controls {
+            padding: 15px;
+        }
+        
+        .led-title {
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .led-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        
+        .led-button {
+            background-color: #f8f9fa;
+            border: none;
+            border-radius: 10px;
+            padding: 15px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .led-button:hover {
+            background-color: #e9ecef;
+        }
+        
+        .led-button.active {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .led-icon {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+        
+        .led-label {
+            font-size: 12px;
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .nav-icon {
+            font-size: 20px;
+            margin-bottom: 5px;
+            color: #6c757d;
+        }
+        
+        .nav-label {
+            font-size: 12px;
+            color: #6c757d;
+        }
+        
+        .nav-item.active .nav-icon,
+        .nav-item.active .nav-label {
+            color: var(--primary-color);
+        }
+        
+        /* Style Toggle */
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            cursor: pointer;
+            z-index: 100;
+        }
+        
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Time display */
+        .timestamp {
+            text-align: center;
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 15px;
+        }
+        
+        /* Gas alert */
+        .alert {
+            background-color: var(--danger-color);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        .alert.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="dashboard">
+            <div class="header" id="dashboard-header">
+                <div class="logo">
+                    <i class="fas fa-microchip"></i>
+                    <div class="header-title">
+                        <h1>IoT Dashboard</h1>
+                        <p id="date-time">Loading...</p>
+                    </div>
+                </div>
+                <i class="fas fa-cog settings-icon"></i>
+            </div>
+            
+            <div class="timestamp" id="last-update">Last update: --:--:--</div>
+            
+            <div class="alert" id="gas-alert">
+                <i class="fas fa-exclamation-triangle"></i> High gas level detected!
+            </div>
+            
+            <div class="sensor-readings">
+                <div class="sensor-card">
+                    <i class="fas fa-temperature-high sensor-icon"></i>
+                    <div class="sensor-value" id="temperature">--°C</div>
+                    <div class="sensor-label">Temperature</div>
+                </div>
+                <div class="sensor-card">
+                    <i class="fas fa-tint sensor-icon"></i>
+                    <div class="sensor-value" id="humidity">--%</div>
+                    <div class="sensor-label">Humidity</div>
+                </div>
+                <div class="sensor-card">
+                    <i class="fas fa-wind sensor-icon"></i>
+                    <div class="sensor-value" id="gas">-- ppm</div>
+                    <div class="sensor-label">Gas Level</div>
+                </div>
+            </div>
+            
+            <div class="led-controls">
+                <h2 class="led-title">LED Controls</h2>
+                <div class="led-grid">
+                    <button class="led-button" id="led1">
+                        <i class="fas fa-lightbulb led-icon"></i>
+                        <span class="led-label">LED 1</span>
+                    </button>
+                    <button class="led-button" id="led2">
+                        <i class="fas fa-lightbulb led-icon"></i>
+                        <span class="led-label">LED 2</span>
+                    </button>
+                    <button class="led-button" id="led3">
+                        <i class="fas fa-lightbulb led-icon"></i>
+                        <span class="led-label">LED 3</span>
+                    </button>
+                    <button class="led-button" id="led-all">
+                        <i class="fas fa-lightbulb led-icon"></i>
+                        <span class="led-label">All LEDs</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="bottom-nav">
+                <div class="nav-item active">
+                    <i class="fas fa-home nav-icon"></i>
+                    <span class="nav-label">Home</span>
+                </div>
+                <div class="nav-item">
+                    <i class="fas fa-chart-line nav-icon"></i>
+                    <span class="nav-label">Stats</span>
+                </div>
+                <div class="nav-item">
+                    <i class="fas fa-cog nav-icon"></i>
+                    <span class="nav-label">Settings</span>
+                </div>
+            </div>
+        </div>
+        
+        <button id="theme-toggle" class="theme-toggle">
+            <i class="fas fa-moon"></i> Toggle Theme
+        </button>
+    </div>
+    
+    <script>
+        // Initial state
+        let theme = 'primary'; // primary or secondary
+        const ledStatus = {
+            led1: false,
+            led2: false,
+            led3: false
+        };
+        
+        // DOM elements
+        const themeToggle = document.getElementById('theme-toggle');
+        const dashboardHeader = document.getElementById('dashboard-header');
+        const ledButtons = {
+            led1: document.getElementById('led1'),
+            led2: document.getElementById('led2'),
+            led3: document.getElementById('led3'),
+            all: document.getElementById('led-all')
+        };
+        const temperatureElement = document.getElementById('temperature');
+        const humidityElement = document.getElementById('humidity');
+        const gasElement = document.getElementById('gas');
+        const dateTimeElement = document.getElementById('date-time');
+        const lastUpdateElement = document.getElementById('last-update');
+        const gasAlertElement = document.getElementById('gas-alert');
+        
+        // Update date and time
+        function updateDateTime() {
+            const now = new Date();
+            const options = { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            dateTimeElement.textContent = now.toLocaleDateString('en-US', options);
+        }
+        
+        // Update last update timestamp
+        function updateLastSync() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US');
+            lastUpdateElement.textContent = `Last update: ${timeStr}`;
+        }
+        
+        // Toggle theme
+        themeToggle.addEventListener('click', () => {
+            if (theme === 'primary') {
+                theme = 'secondary';
+                dashboardHeader.classList.remove('header');
+                dashboardHeader.classList.add('header-alt');
+                document.querySelectorAll('.sensor-icon').forEach(icon => {
+                    icon.classList.remove('sensor-icon');
+                    icon.classList.add('sensor-icon-alt');
+                });
+            } else {
+                theme = 'primary';
+                dashboardHeader.classList.remove('header-alt');
+                dashboardHeader.classList.add('header');
+                document.querySelectorAll('.sensor-icon-alt').forEach(icon => {
+                    icon.classList.remove('sensor-icon-alt');
+                    icon.classList.add('sensor-icon');
+                });
+            }
+        });
+        
+        // LED button event listeners
+        ledButtons.led1.addEventListener('click', () => toggleLED('led1'));
+        ledButtons.led2.addEventListener('click', () => toggleLED('led2'));
+        ledButtons.led3.addEventListener('click', () => toggleLED('led3'));
+        ledButtons.all.addEventListener('click', () => toggleAllLEDs());
+        
+        // Toggle LED function
+        function toggleLED(ledName) {
+            const newStatus = !ledStatus[ledName];
+            
+            // Send to server
+            fetch('/api/led/toggle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    led: ledName,
+                    status: newStatus
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    ledStatus[ledName] = newStatus;
+                    updateLEDUI();
+                }
+            })
+            .catch(error => console.error('Error toggling LED:', error));
+        }
+        
+        // Toggle all LEDs
+        function toggleAllLEDs() {
+            // Check if all are on to determine new state
+            const allOn = ledStatus.led1 && ledStatus.led2 && ledStatus.led3;
+            const newStatus = !allOn;
+            
+            // Update all LEDs to the new status
+            Promise.all([
+                fetch('/api/led/toggle', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        led: 'led1',
+                        status: newStatus
+                    })
+                }),
+                fetch('/api/led/toggle', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        led: 'led2',
+                        status: newStatus
+                    })
+                }),
+                fetch('/api/led/toggle', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        led: 'led3',
+                        status: newStatus
+                    })
+                })
+            ])
+            .then(() => {
+                ledStatus.led1 = newStatus;
+                ledStatus.led2 = newStatus;
+                ledStatus.led3 = newStatus;
+                updateLEDUI();
+            })
+            .catch(error => console.error('Error toggling all LEDs:', error));
+        }
+        
+        // Update LED UI to reflect current state
+        function updateLEDUI() {
+            for (const led in ledStatus) {
+                if (ledStatus[led]) {
+                    ledButtons[led].classList.add('active');
+                } else {
+                    ledButtons[led].classList.remove('active');
+                }
+            }
+            
+            // Update the "All LEDs" button
+            const allOn = ledStatus.led1 && ledStatus.led2 && ledStatus.led3;
+            if (allOn) {
+                ledButtons.all.classList.add('active');
+            } else {
+                ledButtons.all.classList.remove('active');
+            }
+        }
+        
+        // Fetch initial LED status
+        function fetchLEDStatus() {
+            fetch('/api/led/status')
+                .then(response => response.json())
+                .then(data => {
+                    ledStatus.led1 = data.led1;
+                    ledStatus.led2 = data.led2;
+                    ledStatus.led3 = data.led3;
+                    updateLEDUI();
+                })
+                .catch(error => console.error('Error fetching LED status:', error));
+        }
+        
+        // Fetch sensor data
+        function fetchSensorData() {
+            fetch('/api/sensor/data')
+                .then(response => response.json())
+                .then(data => {
+                    temperatureElement.textContent = `${data.temperature.toFixed(1)}°C`;
+                    humidityElement.textContent = `${data.humidity.toFixed(1)}%`;
+                    gasElement.textContent = `${data.gas_value.toFixed(1)} ppm`;
+                    
+                    // Show gas alert if the value is high (example threshold: 400)
+                    if (data.gas_value > 400) {
+                        gasAlertElement.classList.add('show');
+                    } else {
+                        gasAlertElement.classList.remove('show');
+                    }
+                    
+                    updateLastSync();
+                })
+                .catch(error => console.error('Error fetching sensor data:', error));
+        }
+        
+        // Initialize
+        updateDateTime();
+        setInterval(updateDateTime, 1000); // Update time every second
+        
+        // Initial data fetch
+        fetchLEDStatus();
+        fetchSensorData();
+        
+        // Set up interval to fetch data
+        setInterval(fetchSensorData, 5000); // Every 5 seconds
+        setInterval(fetchLEDStatus, 5000); // Every 5 seconds
+    </script>
+</body>
+</html>
